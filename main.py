@@ -12,7 +12,7 @@ import os
 
 # Define Functions
 def clear():
-    os.system('clear')
+    os.system('cls')
 
 def int_input_getter(prompt, num_range):
     while True:
@@ -114,6 +114,7 @@ def decrypt():
       #Read Encrypted Symmetric Key
       f = open("encrypted_sym", "rb")
       encrypted=f.read()
+      f.close()
       #Read Private Key
       with open("private_key.pem", "rb") as key_file:
         private_key = serialization.load_pem_private_key(
