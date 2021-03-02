@@ -21,3 +21,5 @@ https://www.geeksforgeeks.org/encrypt-and-decrypt-files-using-python/
 https://pypi.org/project/pyAesCrypt/
 
 https://www.programiz.com/python-programming/examples/random-number
+
+https://www.windowscentral.com/how-create-system-restore-points-automatically-startup-windows-10
