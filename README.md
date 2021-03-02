@@ -8,6 +8,10 @@ https://repl.it/@BenjaminNichols/RansomwareStudy
    * 1st target directory (can be named anything, just ensure it's in the 'dirs.txt'
 * target_dir2
    * 2nd target directory (can be named anything, just ensure it's in the 'dirs.txt'
+ * public_key.pem (must be named this)
+   * Public key used to encrypt symmetric key 
+ * private_key.pem (must be named this)
+   * Private key used to decrypt symmetric key 
 
 # Notes & Resources
 https://www.geeksforgeeks.org/encrypt-and-decrypt-files-using-python/
