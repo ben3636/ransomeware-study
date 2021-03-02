@@ -1,3 +1,5 @@
+# DISCLAIMER
+This code is proof of concept & for educational purposes only
 # Repl.it Link
 https://repl.it/@BenjaminNichols/RansomwareStudy
 
